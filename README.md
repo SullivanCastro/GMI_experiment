@@ -64,29 +64,6 @@ All methods return the denoised image and the corresponding PSNR value.
 
 ---
 
-## Function Breakdown
-
-### `init_denoising(image_path, kernel_path, nu, is_crr_nn)`
-- Loads the input image and applies blurring.
-- Returns the blurred image, kernel, noise level, and device type (CPU/GPU).
-
-### `pnp_pgd_denoising(image_path, nu, denoiser_type, kernel_path, niter)`
-- Implements Plug-and-Play Proximal Gradient Descent (PnP-PGD).
-- Uses a deep learning denoiser (e.g., DRUNet).
-- Applies proximal gradient updates to iteratively refine the image.
-
-### `red_denoising(image_path, nu, tau, lam, gamma, eta, kernel_path, niter)`
-- Implements Regularization by Denoising (RED).
-- Uses a GSDRUNet-based potential function.
-- Applies an adaptive step size for optimization.
-
-### `crr_nn_denoising(image_path, nu, lmbd, mu, sigma_training, t, kernel_path, niter)`
-- Implements Convex Ridge Regularization Neural Network (CRR-NN).
-- Uses an unrolled gradient approach.
-- Learns convex regularizers to enhance reconstruction.
-
----
-
 ## Debugging Tips
 
 ### Import Errors (`ModuleNotFoundError`)
@@ -107,7 +84,7 @@ UnpicklingError: Weights only load failed...
 
 It's due to PyTorch 2.6+ using `weights_only=True` by default.
 
-#### Fix Option 1 (Simple)
+#### Fix Option 
 Modify the file:
 
 ```
@@ -118,19 +95,6 @@ At line 1470, set:
 
 ```python
 weights_only=False
-```
-
-#### Fix Option 2 (Safe Approach)
-Use PyTorch’s safe allowlist:
-
-```python
-from pytorch_lightning.callbacks import ModelCheckpoint
-import torch.serialization
-
-torch.serialization.add_safe_globals([ModelCheckpoint])
-
-with torch.serialization.safe_globals([ModelCheckpoint]):
-    torch.load("your_model.ckpt")
 ```
 
 ---
