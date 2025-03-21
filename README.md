@@ -1,4 +1,3 @@
-```markdown
 # CRR-NN: Convex Ridge Regularization for Inverse Problems
 
 ## Overview
@@ -176,6 +175,5 @@ with torch.serialization.safe_globals([ModelCheckpoint]):
 ## Acknowledgments
 
 This project was developed as part of the GMI course at École des Ponts ParisTech (2024-2025). It is inspired by recent research in Plug-and-Play optimization and learned convex regularization.
-```
 
 
