@@ -20,18 +20,6 @@ To install the required dependencies, use pip:
 pip install -r requirements.txt
 ```
 
-or Pixi:
-
-```bash
-pixi install
-pixi run jupyter notebook
-```
-
-If Pixi is not installed, get it with:
-
-```bash
-curl -sSL https://install.prefix.dev | bash
-```
 
 ---
 
