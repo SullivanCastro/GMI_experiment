@@ -8,6 +8,7 @@
 
 # Remove voluminous folders
 ckpts
+kernels
 
 # Remove Python compiled files
 __pycache__
