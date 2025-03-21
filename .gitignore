@@ -2,5 +2,12 @@
 # pixi environments
 .pixi
 *.egg-info
+
+# Mac thing
 .DS_Store
+
+# Remove voluminous folders
 ckpts
+
+# Remove Python compiled files
+__pycache__
