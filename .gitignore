@@ -12,3 +12,4 @@ kernels
 
 # Remove Python compiled files
 __pycache__
+*old*
