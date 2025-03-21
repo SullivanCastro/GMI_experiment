@@ -1,16 +1,23 @@
 from time import time 
 
-from math import gamma
-
 import torch
 
-from .utils import psnr, load_image
-from .kernel import load_kernel
-from .prox_operator import f, proxf
-from .denoiser import load_denoiser
-from .blurring import blurring, A
+import os
+import sys
+sys.path.append("convex_ridge_regularizers")
+sys.path.append("convex_ridge_regularizers/inverse_problems")
+from models import utils
+from inverse_problems import AdaGD_Recon
 
-def pnp_pgd_denoising(image_path, nu= 2/255, denoiser_type="DRUNet", kernel_path="kernel8.txt", niter=100):
+
+sys.path.append("tp_models")
+from utils_tp import psnr, load_image
+from kernel import load_kernel
+from prox_operator import f, proxf
+from denoiser import load_denoiser
+from blurring import blurring, A
+
+def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path="kernel8.txt", niter=100):
     # Define the device
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -58,10 +65,10 @@ def pnp_pgd_denoising(image_path, nu= 2/255, denoiser_type="DRUNet", kernel_path
         if (it+1)%10==0:
             print('[%4d/%4d] [%.5f s] PSNR = %.2f'%(it+1,niter,time()-t0,psnrt))
 
-    return x.squeeze().permute(1, 2, 0).detach().cpu().numpy(), psnrtab, rtab
+    return x.squeeze().permute(1, 2, 0).detach().cpu().numpy(), psnrtab[-1]
 
 
-def red_denoising(image_path, nu=2/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, kernel_path="kernel8.txt", niter=100):
+def red_denoising(image_path, nu=1/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, kernel_path="kernel8.txt", niter=100):
     # Define the device
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -116,4 +123,34 @@ def red_denoising(image_path, nu=2/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, 
         if (it+1)%10==0:
             print('[%4d/%4d] [%.5f s] PSNR = %.2f'%(it+1,niter,time()-t0,psnr(x0,x.detach())))
 
-    return x.squeeze().permute(1, 2, 0).detach().cpu().numpy(), psnrtab, rtab
+    return x.squeeze().permute(1, 2, 0).detach().cpu().numpy(), psnr(x0.detach(), x.detach())
+
+
+def crr_nn_denoising(image_path, nu=1/255, lmbd=25, mu=4, sigma_training=5, t=10, kernel_path="kernel8.txt", niter=100):
+    # Define the device
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+    # Load image
+    x0, M, N = load_image(image_path, device, is_crr_nn=True)
+
+    # load kernel
+    fk = load_kernel(kernel_path, M, N, device)
+
+    # blurring operator
+    y = blurring(x0, fk, nu, device)
+
+    # def H, Ht
+    H = lambda x: A(x, fk)
+    Ht = lambda y: A(y, torch.conj(fk))
+
+    # Model
+    exp_name = f'Sigma_{sigma_training}_t_{t}'
+    model = utils.load_model(exp_name, str(device))
+    model.prune(change_splines_to_clip=False, prune_filters=True, collapse_filters=True)
+    model.initializeEigen(size=100)
+    model.precise_lipschitz_bound(n_iter=100)
+
+    # Denoise
+    x_out, _, _, _ = AdaGD_Recon(y=y, H=H, Ht=Ht, model=model, lmbd=lmbd, mu=mu, x_gt=x0, tol=1e-6, max_iter=niter)
+
+    return x_out.squeeze().detach(), psnr(x0.detach(), x_out.detach())
