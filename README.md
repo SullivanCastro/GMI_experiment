@@ -87,43 +87,6 @@ weights_only=False
 
 ---
 
-## Project Structure
-
-```bash
-├── tp_models/                      # Scripts for training/testing models
-│   ├── main.py                     # Main entry point for inference
-│   ├── blurring.py                  # Implements blurring operators
-│   ├── kernel.py                    # Loads kernels for degradation
-│   ├── denoiser.py                   # Loads pre-trained denoisers
-│   ├── prox_operator.py              # Implements proximal operators
-│   ├── utils_tp.py                   # Utility functions (PSNR, image loading)
-│   ├── visualization.py              # Visualization utilities
-│   ├── __init__.py                    # Module initialization
-│
-├── convex_ridge_regularizers/       # Core implementation of CRR-NN
-│   ├── models/                       # Neural networks & architectures
-│   │   ├── convex_ridge_regularizer.py
-│   │   ├── multi_conv.py
-│   │   ├── linear_spline.py
-│   │   ├── quadratic_spline.py
-│   │   ├── utils.py
-│   │   ├── __init__.py
-│   ├── inverse_problems/             # Tools for handling inverse problems
-│   │   ├── reconstruction_map_crr.py
-│   │   ├── utils_inverse_problems.py
-│   │   ├── __init__.py
-│
-├── images/                          # Input/output images
-├── experiments.ipynb                 # Notebook with all results
-├── results.pdf                        # PSNR & comparison charts
-├── README.md                         # This documentation
-├── requirements.txt                   # Python dependencies
-├── pixi.lock / pixi.toml              # Pixi environment config
-├── .gitignore                         # Git exclusions
-```
-
----
-
 ## Acknowledgments
 
 This project was developed as part of the GMI course at École des Ponts ParisTech (2024-2025). It is inspired by recent research in Plug-and-Play optimization and learned convex regularization.
