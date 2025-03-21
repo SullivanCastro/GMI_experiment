@@ -141,6 +141,6 @@ def crr_nn_denoising(image_path, nu=1/255, lmbd=25, mu=4, sigma_training=5, t=10
     model.precise_lipschitz_bound(n_iter=100)
 
     # Denoise
-    x_out, psnr_, _, _ = AdaGD_Recon(y=y, H=H, Ht=Ht, model=model, lmbd=lmbd, mu=mu, x_gt=x0, tol=1e-6, max_iter=niter)
+    x_out, psnr_, _, _, _, _, _= AdaGD_Recon(y=y, H=H, Ht=Ht, model=model, lmbd=lmbd, mu=mu, x_gt=x0, tol=1e-6, max_iter=niter, track_cost=True)
 
-    return x_out.squeeze().detach().cpu(), psnr(x0.detach().cpu(), x_out.detach().cpu()), psnr_
+    return x_out.squeeze().detach().cpu(), psnr(x0.detach().cpu(), x_out.detach().cpu()), psnr_[1:]
