@@ -3,7 +3,7 @@ authors = [{name = "matthieuml", email = "merigotmatthieu@gmail.com"}]
 name = "GMI"
 requires-python = ">= 3.11"
 version = "0.1.0"
-dependencies = ["deepinv @ git+https://github.com/deepinv/deepinv.git#egg=deepinv", "pytorch-lightning>=2.5.1,<3", "ipykernel>=6.29.5,<7", "scikit-image>=0.25.2,<0.26"]
+dependencies = ["deepinv @ git+https://github.com/deepinv/deepinv.git#egg=deepinv", "pytorch-lightning>=2.5.1,<3", "ipykernel>=6.29.5,<7", "scikit-image>=0.25.2,<0.26", "pip>=25.0.1,<26", "opencv-python>=4.11.0.86,<5"]
 
 [build-system]
 build-backend = "hatchling.build"

@@ -3,3 +3,4 @@ from .denoiser import load_denoiser
 from .blurring import blurring, A
 from .prox_operator import f, proxf
 from .kernel import load_kernel
+from .utils_tp import psnr
