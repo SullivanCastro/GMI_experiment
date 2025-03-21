@@ -17,18 +17,26 @@ from prox_operator import f, proxf
 from denoiser import load_denoiser
 from blurring import blurring, A
 
-def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path="kernel8.txt", niter=100):
+
+def init_denoising(image_path, kernel_path="kernel8.txt", nu=1/255, is_crr_nn=False):
     # Define the device
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     # Load image
-    x0, M, N = load_image(image_path, device)
+    x0, M, N = load_image(image_path, device, is_crr_nn)
 
     # load kernel
     fk = load_kernel(kernel_path, M, N, device)
 
     # blurring operator
     y = blurring(x0, fk, nu, device)
+
+    return x0, fk, y, device
+
+
+def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path="kernel8.txt", niter=100):
+    # Initialize
+    x0, fk, y, device = init_denoising(image_path, kernel_path, nu)
 
     # load denoiser
     D = load_denoiser(denoiser_type, device)
@@ -67,17 +75,8 @@ def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path
 
 
 def red_denoising(image_path, nu=1/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, kernel_path="kernel8.txt", niter=100):
-    # Define the device
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-    # Load image
-    x0, M, N = load_image(image_path, device)
-
-    # load kernel
-    fk = load_kernel(kernel_path, M, N, device)
-
-    # blurring operator
-    y = blurring(x0, fk, nu, device)
+    # Initialize
+    x0, fk, y, device = init_denoising(image_path, kernel_path, nu)
 
     # load denoiser
     D = load_denoiser("GSDRUNet", device)
@@ -125,17 +124,8 @@ def red_denoising(image_path, nu=1/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, 
 
 
 def crr_nn_denoising(image_path, nu=1/255, lmbd=25, mu=4, sigma_training=5, t=10, kernel_path="kernel8.txt", niter=100):
-    # Define the device
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-    # Load image
-    x0, M, N = load_image(image_path, device, is_crr_nn=True)
-
-    # load kernel
-    fk = load_kernel(kernel_path, M, N, device)
-
-    # blurring operator
-    y = blurring(x0, fk, nu, device)
+    # Initialize
+    x0, fk, y, device = init_denoising(image_path, kernel_path, nu, is_crr_nn=True)
 
     # def H, Ht
     H = lambda x: A(x, fk)
