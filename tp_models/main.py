@@ -50,6 +50,7 @@ def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path
     normxinit = torch.linalg.vector_norm(x)
 
     rtab = []
+    psnrtab = []
     t0 = time()
 
     print('[%4d/%4d] [%.5f s] PSNR = %.2f'%(0,niter,0,psnr(x0,y)))
@@ -67,11 +68,12 @@ def pnp_pgd_denoising(image_path, nu= 1/255, denoiser_type="DRUNet", kernel_path
         rtab.append((torch.linalg.vector_norm(x - x_prev) / normxinit).detach().cpu())
 
         psnrt = psnr(x0, x.detach())
+        psnrtab.append(psnrt)
 
         if (it+1)%10==0:
             print('[%4d/%4d] [%.5f s] PSNR = %.2f'%(it+1,niter,time()-t0,psnrt))
 
-    return x.squeeze().permute(1, 2, 0).detach().cpu(), psnr(x0.detach().cpu(), x.detach().cpu())
+    return x.squeeze().permute(1, 2, 0).detach().cpu(), psnr(x0.detach().cpu(), x.detach().cpu()), psnrtab
 
 
 def red_denoising(image_path, nu=1/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, kernel_path="kernel8.txt", niter=100):
@@ -120,7 +122,7 @@ def red_denoising(image_path, nu=1/255, tau=2e-5, lam=1600, gamma=0.4, eta=0.9, 
         if (it+1)%10==0:
             print('[%4d/%4d] [%.5f s] PSNR = %.2f'%(it+1,niter,time()-t0,psnr(x0,x.detach())))
 
-    return x.squeeze().permute(1, 2, 0).detach().cpu(), psnr(x0.detach().cpu(), x.detach().cpu())
+    return x.squeeze().permute(1, 2, 0).detach().cpu(), psnr(x0.detach().cpu(), x.detach().cpu()), psnrtab
 
 
 def crr_nn_denoising(image_path, nu=1/255, lmbd=25, mu=4, sigma_training=5, t=10, kernel_path="kernel8.txt", niter=100):
@@ -139,6 +141,6 @@ def crr_nn_denoising(image_path, nu=1/255, lmbd=25, mu=4, sigma_training=5, t=10
     model.precise_lipschitz_bound(n_iter=100)
 
     # Denoise
-    x_out, _, _, _ = AdaGD_Recon(y=y, H=H, Ht=Ht, model=model, lmbd=lmbd, mu=mu, x_gt=x0, tol=1e-6, max_iter=niter)
+    x_out, psnr_, _, _ = AdaGD_Recon(y=y, H=H, Ht=Ht, model=model, lmbd=lmbd, mu=mu, x_gt=x0, tol=1e-6, max_iter=niter)
 
-    return x_out.squeeze().detach().cpu(), psnr(x0.detach().cpu(), x_out.detach().cpu())
+    return x_out.squeeze().detach().cpu(), psnr(x0.detach().cpu(), x_out.detach().cpu()), psnr_
